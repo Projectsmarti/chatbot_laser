@@ -3,3 +3,6 @@ requests
 Pillow
 python-dotenv
 google-generativeai
+protobuf
+
+
