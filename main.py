@@ -21,9 +21,11 @@ if 'support_stage' not in st.session_state:
 # Predefined welcome message
 WELCOME_MESSAGE = "Welcome to LaserTech Support Assistant! How can I assist you today?"
 
+
 # Load company logo
 def load_logo():
-    return Image.open("logo.jpg")
+    return Image.open("logo.jpeg")
+
 
 def get_enhanced_prompt(user_input, context=None):
     """Generate enhanced prompts for better responses"""
@@ -46,6 +48,7 @@ def get_enhanced_prompt(user_input, context=None):
     4. Safety warnings if applicable
     """
     return base_prompt
+
 
 def get_gemini_response(prompt, context=None):
     """Get enhanced response from Google Gemini model"""
@@ -78,58 +81,109 @@ def get_gemini_response(prompt, context=None):
         print(f"Error generating response: {exc}")
         return "An error occurred while generating a response. Please try again."
 
+
 def main():
-    st.sidebar.image(load_logo(), use_column_width=True)
-    st.title("LaserTech Support Assistant")
+    # Custom CSS for centering and styling
+    st.markdown("""
+        <style>
+            .main > div {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 1rem;
+            }
+            .logo-container {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+            .logo-container img {
+                width: 200px;
+                height: auto;
+                margin: 0 auto;
+            }
+            .stButton > button {
+                display: block;
+                margin: 1rem auto;
+                width: 200px;
+            }
+            .chat-message {
+                margin: 1rem 0;
+                padding: 1rem;
+                border-radius: 10px;
+            }
+            .user-message {
+                background-color: #e3f2fd;
+                margin-left: 20%;
+            }
+            .assistant-message {
+                background-color: #f5f5f5;
+                margin-right: 20%;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Center-aligned logo
+    st.markdown('<div class="logo-container">', unsafe_allow_html=True)
+    st.image(load_logo(), width=200)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Centered title
+    st.markdown('<h1 style="text-align: center;">LaserTech Support Assistant</h1>', unsafe_allow_html=True)
 
     # Welcome stage
     if st.session_state.support_stage == "welcome":
-        st.markdown(WELCOME_MESSAGE)
-        st.session_state.chat_history = []  # Clear history on new session
+        st.markdown(f'<p style="text-align: center;">{WELCOME_MESSAGE}</p>', unsafe_allow_html=True)
+        st.session_state.chat_history = []
 
-        if st.button("Start Support Session"):
-            st.session_state.support_stage = "support"
-            st.experimental_rerun()
+        # Centered start button
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            if st.button("Start Support Session"):
+                st.session_state.support_stage = "support"
+                st.experimental_rerun()
 
     # Support stage
     elif st.session_state.support_stage == "support":
-        # User input
-        user_input = st.text_area("Describe your issue or ask a question:")
-
-        if st.button("Send"):
-            if user_input:
-                # Add user message to chat history
-                st.session_state.chat_history.append({
-                    "role": "user",
-                    "content": user_input
-                })
-
-                # Generate enhanced prompt and get response
-                enhanced_prompt = get_enhanced_prompt(
-                    user_input,
-                    context=str(st.session_state.chat_history)
-                )
-                response = get_gemini_response(enhanced_prompt)
-
-                # Add assistant response to chat history
-                st.session_state.chat_history.append({
-                    "role": "assistant",
-                    "content": response
-                })
-
-        # Display chat history
-        st.write("### Support Conversation")
+        # Centered chat container
         for message in st.session_state.chat_history:
             if message["role"] == "user":
-                st.write(f"👤 **You:** {message['content']}")
+                st.markdown(
+                    f'<div class="chat-message user-message">👤 <strong>You:</strong> {message["content"]}</div>',
+                    unsafe_allow_html=True
+                )
             else:
-                st.write(f"🤖 **Assistant:** {message['content']}")
+                st.markdown(
+                    f'<div class="chat-message assistant-message">🤖 <strong>Assistant:</strong> {message["content"]}</div>',
+                    unsafe_allow_html=True
+                )
 
-        # Clear chat history
-        if st.button("Clear Chat History"):
-            st.session_state.chat_history = []
-            st.session_state.support_stage = "welcome"
-            st.experimental_rerun()
+        # Centered input box
+        col1, col2, col3 = st.columns([1, 3, 1])
+        with col2:
+            user_input = st.text_area("", placeholder="Type your message here...", height=100)
+
+            # Centered buttons
+            if st.button("Send"):
+                if user_input:
+                    st.session_state.chat_history.append({
+                        "role": "user",
+                        "content": user_input
+                    })
+                    enhanced_prompt = get_enhanced_prompt(
+                        user_input,
+                        context=str(st.session_state.chat_history)
+                    )
+                    response = get_gemini_response(enhanced_prompt)
+                    st.session_state.chat_history.append({
+                        "role": "assistant",
+                        "content": response
+                    })
+                    st.experimental_rerun()
+
+            if st.button("Clear Chat History"):
+                st.session_state.chat_history = []
+                st.session_state.support_stage = "welcome"
+                st.experimental_rerun()
+
 
 if __name__ == "__main__":
     main()
