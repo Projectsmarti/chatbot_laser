@@ -139,7 +139,7 @@ def main():
         with col2:
             if st.button("Start Support Session"):
                 st.session_state.support_stage = "support"
-                st.experimental_rerun()
+                st.rerun()  # Updated from experimental_rerun()
 
     # Support stage
     elif st.session_state.support_stage == "support":
@@ -177,12 +177,12 @@ def main():
                         "role": "assistant",
                         "content": response
                     })
-                    st.experimental_rerun()
+                    st.rerun()  # Updated from experimental_rerun()
 
             if st.button("Clear Chat History"):
                 st.session_state.chat_history = []
                 st.session_state.support_stage = "welcome"
-                st.experimental_rerun()
+                st.rerun()  # Updated from experimental_rerun()
 
 
 if __name__ == "__main__":
